@@ -1,0 +1,59 @@
+import requests
+from datetime import datetime, timedelta
+
+# กำหนด Token ที่ได้จาก Line Notify
+token = '1FDIUNa4zNFzgXXqLQclvglj5NGtj5oTZu0QsgOUH7U'
+
+# URL ของ API สำหรับส่งข้อความ Line Notify
+url = 'https://notify-api.line.me/api/notify'
+
+# สร้างตารางเรียนในรูปแบบของ dictionary
+schedule = {
+    'Monday': [
+        {'time': '09:00 - 12:00', 'subject': '1101011', 'location': 'B6501'},
+    ],
+    'Tuesday': [
+        {'time': '15:00 - 18:00', 'subject': 'IST330 11033', 'location': 'B5204'}
+    ],
+    'Wednesday': [
+        {'time': '09:00 - 12:00', 'subject': '1101012', 'location': 'B6501'},
+        {'time': '15:00 - 17:00', 'subject': 'IST20 1503', 'location': 'B4101'}
+    ],
+    'Thursday': [],
+    'Friday': [],
+    'Saturday': [],
+    'Sunday': []
+}
+
+# วันปัจจุบัน (ในที่นี้เราจะใช้วันจันทร์เป็นตัวอย่าง)
+today = datetime.now().strftime('%A')
+
+# ตรวจสอบว่ามีตารางเรียนในวันที่ปัจจุบันหรือไม่
+if today in schedule:
+    # สร้างข้อความที่ต้องการจะส่ง
+    message = f"Schedule for {today}:\n\n"
+    if schedule[today]:  # ตรวจสอบว่ามีตารางเรียนหรือไม่
+        for event in schedule[today]:
+            message += f"Time: {event['time']}\nSubject: {event['subject']}\nLocation: {event['location']}\n\n"
+    else:
+        message += "No classes scheduled.\n"
+
+    # กำหนดข้อมูลส่งไปยัง Line Notify
+    data = {
+        'message': message.strip(),  # ลบช่องว่างด้านหลังข้อความ
+        'notificationDisabled': False,
+    }
+
+    # กำหนด Header สำหรับของใช้งาน API
+    headers = {
+        'Content-Type': 'application/x-www-form-urlencoded',
+        'Authorization': 'Bearer ' + token
+    }
+
+    # ส่งข้อมูลไปยัง Line Notify API
+    response = requests.post(url, headers=headers, data=data)
+
+    # ตรวจสอบคำตอบจาก Line Notify API
+    print(response.text)
+else:
+    print(f"No schedule found for {today}")
